@@ -1,24 +1,39 @@
-import './style.css'
-import javascriptLogo from './javascript.svg'
-import viteLogo from '/vite.svg'
-import { setupCounter } from './counter.js'
+import * as THREE from "three";
+import { Renderer } from "./components/Renderer";
+import { Camera } from "./components/Camera";
+import { DirectionalLight } from "./components/DirectionalLight";
+import { player } from "./components/Player";
+import { map, initializeMap } from "./components/Map";
+import { animateVehicles } from "./animateVehicles";
+import { animatePlayer } from "./animatePlayer";
+import "./style.css";
+import "./userInput";
 
-document.querySelector('#app').innerHTML = `
-  <div>
-    <a href="https://vite.dev" target="_blank">
-      <img src="${viteLogo}" class="logo" alt="Vite logo" />
-    </a>
-    <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript" target="_blank">
-      <img src="${javascriptLogo}" class="logo vanilla" alt="JavaScript logo" />
-    </a>
-    <h1>Hello Vite!</h1>
-    <div class="card">
-      <button id="counter" type="button"></button>
-    </div>
-    <p class="read-the-docs">
-      Click on the Vite logo to learn more
-    </p>
-  </div>
-`
+const scene = new THREE.Scene();
+scene.add(player);
+scene.add(map);
 
-setupCounter(document.querySelector('#counter'))
+const ambientLight = new THREE.AmbientLight();
+scene.add(ambientLight);
+
+const directionalLight = DirectionalLight();
+directionalLight.position.set(-100, -100, 200);
+scene.add(directionalLight);
+
+const camera = Camera();
+scene.add(camera);
+
+initializeGame();
+
+function initializeGame(){
+  initializeMap();
+}
+
+const renderer = Renderer();
+renderer.setAnimationLoop(animate);
+
+function animate(){
+  animateVehicles();
+  animatePlayer();
+  renderer.render(scene, camera);
+}
