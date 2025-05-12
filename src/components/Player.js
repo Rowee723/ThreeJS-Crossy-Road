@@ -1,4 +1,6 @@
 import * as THREE from "three";
+import { checkValidPosition } from "../utilities/checkValidPosition";
+import { metadata as rows, addRows } from "./Map";
 
 export const player = Player();
 
@@ -31,7 +33,10 @@ function Player(){
     cap.receiveShadow = true;
     player.add(cap);
 
-    return player;
+    const playerContainer = new THREE.Group();
+    playerContainer.add(player);
+
+    return playerContainer;
 }
 
 export const position = {
@@ -42,6 +47,16 @@ export const position = {
 export const moveQueue = [];
 
 export function queueMove(direction){
+    const isValidMove = checkValidPosition(
+        {
+            rowIndex: position.currentRow,
+            tileIndex: position.currentTile
+        },
+        [...moveQueue, direction]
+    );
+
+    if (!isValidMove) return;
+
     moveQueue.push(direction);
 }
 
@@ -52,4 +67,23 @@ export function stepCompleted(){
     if(direction === "backward") position.currentRow -= 1;
     if(direction === "left") position.currentTile -= 1;
     if(direction === "right") position.currentTile += 1;
+
+    if(position.currentRow > rows.length - 10) addRows();
+
+    const scoreDOM = document.getElementById("score");
+    if(scoreDOM) scoreDOM.innerText = position.currentRow.toString();
+}
+
+export function initializePlayer() {
+  // Initialize the Three.js player object
+  player.position.x = 0;
+  player.position.y = 0;
+  player.children[0].position.z = 0;
+
+  // Initialize metadata
+  position.currentRow = 0;
+  position.currentTile = 0;
+
+  // Clear the moves queue
+  moveQueue.length = 0;
 }
